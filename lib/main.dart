@@ -63,9 +63,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           child: _image != null
               ? Align(
-                  alignment: Alignment.topLeft,
+                  alignment: Alignment.bottomLeft,
                   child: Wrap(
-                    direction: Axis.vertical,
+                    direction: Axis.horizontal,
                     spacing: 10.0, // gap between adjacent chips
                     runSpacing: 0.0,
                     children: [
@@ -109,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
         FirebaseVisionImage.fromFile(_image);
 //    final TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
     final ImageLabeler labeler = FirebaseVision.instance.imageLabeler(
-      ImageLabelerOptions(confidenceThreshold: 0.25),
+      ImageLabelerOptions(confidenceThreshold: 0.75),
     );
     final List<ImageLabel> labels =
         await labeler.processImage(firebaseVisionImage);
