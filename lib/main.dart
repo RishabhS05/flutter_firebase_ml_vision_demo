@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -8,7 +9,6 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Firebase ML Vision Demo'),
     );
   }
 }
@@ -33,8 +33,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   File _image;
   final picker = ImagePicker();
-
-  void _incrementCounter() {}
+  List<String> _labels = List();
 
   Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.camera);
@@ -42,6 +41,8 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _image = File(pickedFile.path);
     });
+    getText();
+    setState(() {});
   }
 
   @override
@@ -52,16 +53,58 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: Container(
-            child: _image!=null?Image(
-          image: FileImage(_image),
-        ):Container( child: Text("Tap to capture image."),)
-        ),
+            child: _image != null
+                ? Stack(
+                    children: [
+                      Center(
+                        child: Image(
+                          fit: BoxFit.cover,
+                          height: double.infinity,
+                          width: double.infinity,
+                          alignment: Alignment.center,
+                          image: FileImage(_image),
+                        ),
+                      ),
+                      ListView.builder(
+                          itemCount: _labels.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Card(
+                              color: Colors.grey[100],
+                              elevation: 4,
+                              child: Text(
+                                _labels[index],
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white),
+                              ),
+                            );
+                          })
+                    ],
+                  )
+                : Container(
+                    child: Text("Tap to capture image."),
+                  )),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: getImage,
         tooltip: 'Take Image',
         child: Icon(Icons.camera),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
+  }
+
+  Future getText() async {
+    FirebaseVisionImage firebaseVisionImage =
+        FirebaseVisionImage.fromFile(_image);
+//    final TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
+    final ImageLabeler labeler = FirebaseVision.instance.imageLabeler(
+      ImageLabelerOptions(confidenceThreshold: 0.75),
+    );
+    final List<ImageLabel> labels =
+        await labeler.processImage(firebaseVisionImage);
+    for (ImageLabel label in labels) {
+      print("${label.text}");
+      _labels.add(label.text);
+    }
+    labeler.close();
   }
 }
