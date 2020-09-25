@@ -63,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           child: _image != null
               ? Align(
-                  alignment: Alignment.bottomLeft,
+                  alignment: Alignment.topLeft,
                   child: Wrap(
                     direction: Axis.horizontal,
                     spacing: 10.0, // gap between adjacent chips
@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                             ),
                             color: Colors.grey[500],
-                            elevation: 10,
+                            elevation: 20,
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(8.0,4,8,4),
                               child: Text(
@@ -109,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
         FirebaseVisionImage.fromFile(_image);
 //    final TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
     final ImageLabeler labeler = FirebaseVision.instance.imageLabeler(
-      ImageLabelerOptions(confidenceThreshold: 0.75),
+      ImageLabelerOptions(confidenceThreshold: 0.55),
     );
     final List<ImageLabel> labels =
         await labeler.processImage(firebaseVisionImage);
@@ -117,6 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print("${label.text}");
       _labels.add(label.text);
     }
+
     labeler.close();
   }
 }
