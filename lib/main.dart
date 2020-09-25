@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Firebase ML Vision Demo'),
+      home: MyHomePage(title: 'Image labeler'),
     );
   }
 }
@@ -51,39 +51,51 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Container(
-            child: _image != null
-                ? Stack(
+      body: Container(
+          width: MediaQuery.of(context).size.width,
+          height:MediaQuery.of(context).size.height ,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+                fit: BoxFit.cover,
+                image: _image != null
+                    ? FileImage(_image)
+                    : AssetImage("assets/white.jpeg")),
+          ),
+          child: _image != null
+              ? Align(
+                  alignment: Alignment.topLeft,
+                  child: Wrap(
+                    direction: Axis.vertical,
+                    spacing: 10.0, // gap between adjacent chips
+                    runSpacing: 0.0,
                     children: [
-                      Center(
-                        child: Image(
-                          fit: BoxFit.cover,
-                          height: double.infinity,
-                          width: double.infinity,
-                          alignment: Alignment.center,
-                          image: FileImage(_image),
-                        ),
-                      ),
-                      ListView.builder(
-                          itemCount: _labels.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Card(
-                              color: Colors.grey[100],
-                              elevation: 4,
-                              child: Text(
-                                _labels[index],
-                                style: TextStyle(
-                                    fontSize: 20, color: Colors.white),
+                      for (int i = 0; i <_labels.length; i++)
+                        Opacity(
+                          opacity: 0.75,
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(40),
                               ),
-                            );
-                          })
+                            ),
+                            color: Colors.grey[500],
+                            elevation: 10,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(8.0,4,8,4),
+                              child: Text(
+                                _labels[i],
+                                style:
+                                    TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
-                  )
-                : Container(
-                    child: Text("Tap to capture image."),
-                  )),
-      ),
+                  ),
+                )
+              : Container(
+                  child: Center(child: Text("Tap to capture image.")),
+                )),
       floatingActionButton: FloatingActionButton(
         onPressed: getImage,
         tooltip: 'Take Image',
@@ -97,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
         FirebaseVisionImage.fromFile(_image);
 //    final TextRecognizer textRecognizer = FirebaseVision.instance.textRecognizer();
     final ImageLabeler labeler = FirebaseVision.instance.imageLabeler(
-      ImageLabelerOptions(confidenceThreshold: 0.75),
+      ImageLabelerOptions(confidenceThreshold: 0.25),
     );
     final List<ImageLabel> labels =
         await labeler.processImage(firebaseVisionImage);
